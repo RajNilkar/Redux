@@ -28,14 +28,14 @@ class DijkstraSolver : ISolver<SHORTESTPATH>
 		if (nodes.Count == 0)
 			return "{}"; // No nodes, return empty path
 
-		string sourceNode = problem.sourceNode;
-		string targetNode = problem.targetNode;
+		string sourceNode = string.IsNullOrWhiteSpace(problem.sourceNode) ? nodes[0] : problem.sourceNode;
+		string targetNode = string.IsNullOrWhiteSpace(problem.targetNode) ? nodes[^1] : problem.targetNode;
 
 		var adjacency = BuildAdjacency(graph);
 
 		//Initialize distances
 		var dist = nodes.ToDictionary(n => n, _ => int.MaxValue);
-        var prev = nodes.ToDictionary(n => n, _ => (string)null);
+        var prev = nodes.ToDictionary(n => n, _ => (string?)null);
         var visited = new HashSet<string>();
         var pq = new DijkstraPriorityQueue<string>();
 
@@ -114,7 +114,7 @@ class DijkstraSolver : ISolver<SHORTESTPATH>
 		{
 			// Check if edge is weighted
 			bool firstLooksLikeCollection = LooksLikeCollection(rawEdge[0]);
-			bool secondLooksLikeCollection = LooksLikeCollection(rawEdge[1]);
+			bool secondLooksLikeCollection = rawEdge.Count() > 1 && LooksLikeCollection(rawEdge[1]);
 			bool isWeighted = rawEdge.Count() == 2 && firstLooksLikeCollection && !secondLooksLikeCollection;
 
 			if (isWeighted)
@@ -185,7 +185,7 @@ class DijkstraSolver : ISolver<SHORTESTPATH>
 	internal static List<string> ReconstructPath(Dictionary<string, string?> prev, string source, string target)
 	{
 		var path = new List<string>();
-		string current = target;
+		string? current = target;
 
 		while (current != null)
 		{

@@ -110,8 +110,13 @@ public class ProblemProvider : ControllerBase
     [HttpGet("info")]
     public string info(string @interface)
     {
-        // TODO: validate arguments
-        return Newtonsoft.Json.JsonConvert.SerializeObject(Activator.CreateInstance(Interfaces[@interface.ToLower()]));
+        if (string.IsNullOrWhiteSpace(@interface))
+            return Newtonsoft.Json.JsonConvert.SerializeObject(null);
+
+        if (!Interfaces.TryGetValue(@interface.ToLower(), out Type? type))
+            return Newtonsoft.Json.JsonConvert.SerializeObject(null);
+
+        return Newtonsoft.Json.JsonConvert.SerializeObject(Activator.CreateInstance(type));
     }
 
     /// <summary>
@@ -180,7 +185,8 @@ public class ProblemProvider : ControllerBase
     [HttpPost("visualize")]
     public string visualize(string visualization, string solver, [FromBody] string instance)
     {
-        return getVisualize(Visualization(visualization), Solver(solver).GetSteps(instance), Solver(solver).solve(instance), instance);
+        ISolver solverInstance = Solver(solver);
+        return getVisualize(Visualization(visualization), solverInstance.GetSteps(instance), solverInstance.solve(instance), instance);
     }
 
     /// <summary>
@@ -193,7 +199,10 @@ public class ProblemProvider : ControllerBase
     [HttpPost("visualizeReduction")]
     public string visualizeReduction(string reduction, string solver, [FromBody] string instance)
     {
-        List<string> reds = reduction.Split("-").ToList();
+        List<string> reds = reduction.Split("-", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).ToList();
+
+        if (reds.Count == 0)
+            throw new ArgumentException("At least one reduction is required.", nameof(reduction));
 
         ISolver sol = Solver(solver);
         List<string> steps = sol.GetSteps(instance);
@@ -207,6 +216,9 @@ public class ProblemProvider : ControllerBase
             solution = red.mapSolutions(solution);
             instance = red.reductionTo.instance;
         }
+
+        if (red == null)
+            throw new InvalidOperationException("Reduction visualization could not be created.");
 
         return getVisualize(red.visualization, steps, solution, instance);
     }

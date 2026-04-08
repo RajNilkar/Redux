@@ -28,14 +28,14 @@ class BFSSolver : ISolver<SHORTESTPATH>
         if (nodes.Count == 0)
             return "{}"; // No nodes, return empty path
 
-        string sourceNode = nodes[0];
-        string targetNode = nodes[^1];
+        string sourceNode = string.IsNullOrWhiteSpace(problem.sourceNode) ? nodes[0] : problem.sourceNode;
+        string targetNode = string.IsNullOrWhiteSpace(problem.targetNode) ? nodes[^1] : problem.targetNode;
 
         var adjacency = BuildAdjacency(graph);
 
         // Initialize distances
         var dist = nodes.ToDictionary(n => n, _ => int.MaxValue);
-        var prev = nodes.ToDictionary(n => n, _ => (string)null);
+        var prev = nodes.ToDictionary(n => n, _ => (string?)null);
         var visited = new HashSet<string>();
         Queue<string> queue = new Queue<string>();
 
@@ -82,7 +82,7 @@ class BFSSolver : ISolver<SHORTESTPATH>
 
         // Ensure every node appears in adjacency (even isolated)
         foreach (var node in graph.Nodes)
-            adjacency[node.ToString()] = new List<string>();
+            adjacency[node.ToString()!] = new List<string>();
 
         if (graph.Edges.Count() == 0)
             return adjacency; // No edges, return empty adjacency list
@@ -171,7 +171,7 @@ class BFSSolver : ISolver<SHORTESTPATH>
     internal static List<string> ReconstructPath(Dictionary<string, string?> prev, string source, string target)
     {
         var path = new List<string>();
-        string current = target;
+        string? current = target;
 
         while (current != null)
         {

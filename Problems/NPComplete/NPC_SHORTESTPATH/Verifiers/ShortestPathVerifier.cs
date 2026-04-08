@@ -81,7 +81,10 @@ class ShortestPathVerifier : IVerifier<SHORTESTPATH>
             
             length += w;
         }
-        return reachable && length == shortest.Value; // Valid if path is correct and matches true shortest distance
+        if (!reachable)
+            return false;
+
+        return length == shortest!.Value; // Valid if path is correct and matches true shortest distance
     }
 
     // ShortestDistance: helper method to compute shortest distance using Dijkstra's algorithm

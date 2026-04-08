@@ -24,7 +24,7 @@ class Queue<T>
 			throw new InvalidOperationException("The queue is empty");
 		}
 
-		T item = elements.First.Value;
+		T item = elements.First!.Value;
 		elements.RemoveFirst();
 		return item;
 	}
@@ -37,6 +37,6 @@ class Queue<T>
 			throw new InvalidOperationException("The queue is empty");
 		}
 
-		return elements.First.Value;
+		return elements.First!.Value;
 	}
 }

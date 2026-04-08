@@ -12,7 +12,7 @@ using System.Linq;
 public class ContributorProfileController : ControllerBase {
 #pragma warning restore CS1591
 
-    ///Retrieve a contributor's full profile including their personal details and all contributions to the project</summary>
+    /// <summary>Retrieve a contributor's full profile including their personal details and all contributions to the project</summary>
     /// <param name="contributorName">The name of the contributor whose profile you want to view</param>
     /// <response code="200">Successfully returns the contributor's complete profile with all their work</response>
     [ProducesResponseType(typeof(ContributorPortfolio), 200)]
@@ -227,7 +227,7 @@ public class ContributorProfileController : ControllerBase {
         return reductions.Distinct();
     }
 
-    private ContributorInfo GetContributorInfo(string contributorName) {
+    private ContributorInfo? GetContributorInfo(string contributorName) {
         try {
             string projectSourcePath = ProjectSourcePath.Value;
             string infoFilePath = Path.Combine(projectSourcePath, "wwwroot", "contributorInfo.json");
@@ -246,7 +246,7 @@ public class ContributorProfileController : ControllerBase {
                     x.Key.Equals(contributorName, StringComparison.OrdinalIgnoreCase));
                 
                 if (!string.IsNullOrEmpty(contributor.Key)) {
-                    return contributor.Value;
+                    return contributor.Value!;
                 }
             }
         }

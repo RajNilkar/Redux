@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Collections;
+using API.Interfaces;
 
 // Get all Solvers regardless of complexity class
 [ApiController]
@@ -82,6 +83,13 @@ public class Problem_SolversRefactorController : ControllerBase {
 
             string NOT_FOUND_ERR_SOLVER = "entered a solver that does not exist";
 
+    private static readonly HashSet<string> SolverTypeNames =
+        AppDomain.CurrentDomain.GetAssemblies()
+            .SelectMany(assembly => assembly.GetTypes())
+            .Where(type => typeof(ISolver).IsAssignableFrom(type) && type.IsClass)
+            .Select(type => type.Name)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
 ///<summary>Returns all solvers available for a given problem </summary>
 ///<param name="chosenProblem" example="SAT3">Problem name</param>
 ///<param name="problemType" example="NPC">Problem type</param>
@@ -118,7 +126,8 @@ public class Problem_SolversRefactorController : ControllerBase {
                 if (file is null)
                     continue;
                 string fileNoExt = file.Split('.')[0]; //gets the file without the file extension
-                subFilesList.Add(fileNoExt);
+                if (SolverTypeNames.Contains(fileNoExt))
+                    subFilesList.Add(fileNoExt);
             }
 
              // Note -Caleb- the following is a temp solution to solve 3SAT using a clique solver remove, when
